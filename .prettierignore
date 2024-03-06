@@ -1,0 +1,15 @@
+# Build / Output Directories:
+build/
+dist/
+.next/
+
+# Dependency Directories:
+node_modules/
+
+# Coverage Reports:
+coverage/
+
+# Miscellaneous
+.env 
+.vscode/
+*.log 
