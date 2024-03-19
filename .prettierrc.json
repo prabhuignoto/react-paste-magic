@@ -3,5 +3,11 @@
   "trailingComma": "all",
   "printWidth": 100,
   "tabWidth": 2,
-  "semi": false
+  "semi": true,
+  "arrowParens": "avoid",
+  "jsxSingleQuote": false,
+  "bracketSpacing": true,
+  "jsxBracketSameLine": false,
+  "quoteProps": "as-needed",
+  "endOfLine": "auto"
 }

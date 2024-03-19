@@ -16,5 +16,6 @@ module.exports = {
     'react/jsx-no-target-blank': 'off',
     'prettier/prettier': 'error',
     'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
+    camelcase: 'error',
   },
-}
+};
