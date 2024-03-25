@@ -2,6 +2,7 @@ import { ReactNode, RefObject, useCallback, useEffect, useRef, useState } from '
 import { createPortal } from 'react-dom';
 import { Popup } from '../components/popup/popup';
 import { useKeyboard } from './useKeyboard';
+import usePaste from './usePaste';
 
 type usePopupProps = {
   width?: number;
@@ -15,13 +16,28 @@ let usePopup: (props: usePopupProps) => ReactNode | null;
 usePopup = ({ ref, width = 400, height = 400, title }) => {
   const [popupOpen, setPopupOpen] = useState(false);
 
-  const { activated, data } = useKeyboard({ ref, ctrlKeyUsed: true, keyCode: 'v' });
+  const [popupData, setPopupData] = useState('');
+
+  const { activated, reset } = useKeyboard({ ref, ctrlKeyUsed: true, keyCode: 'v' });
 
   const bodyRef = useRef(document.body);
 
   const popupPlaceholder = useRef(document.createElement('div'));
 
-  const handleClose = useCallback(() => setPopupOpen(false), []);
+  usePaste(ref, data => setPopupData(data));
+
+  useEffect(() => {
+    console.log(popupData, activated);
+  }, [popupData, activated]);
+
+  const handleClose = useCallback(() => {
+    setPopupOpen(false);
+    reset?.();
+
+    // if (ref.current) {
+    //   ref.current.focus();
+    // }
+  }, []);
 
   useEffect(() => {
     if (activated) {
@@ -45,8 +61,9 @@ usePopup = ({ ref, width = 400, height = 400, title }) => {
         display: none;
         align-items: center;
         justify-content: center;
-        background: red;
         padding: 10px;
+        background: #fff;
+        border-radius: 4px;
       `;
 
       body.appendChild(placeholder);
@@ -57,7 +74,7 @@ usePopup = ({ ref, width = 400, height = 400, title }) => {
     if (activated) {
       setPopupOpen(true);
     }
-  }, [activated, data]);
+  }, [activated]);
 
   useEffect(() => {
     if (ref.current && popupOpen) {
@@ -75,7 +92,7 @@ usePopup = ({ ref, width = 400, height = 400, title }) => {
 
   return popupOpen
     ? createPortal(
-        <Popup title={title} onClose={handleClose} data={data} />,
+        <Popup title={title} onClose={handleClose} data={popupData} />,
         popupPlaceholder.current,
       )
     : null;

@@ -1,8 +1,8 @@
-import { useCallback, useEffect } from 'react';
+import { RefObject, useCallback, useEffect } from 'react';
 
-let usePaste: (callback: (data: any) => void) => void;
+let usePaste: (ref: RefObject<HTMLElement>, callback: (data: any) => void) => void;
 
-usePaste = callback => {
+usePaste = (ref, callback) => {
   const handlePaste = useCallback((event: ClipboardEvent) => {
     const data = event.clipboardData?.getData('text');
     callback(data);
@@ -16,16 +16,24 @@ usePaste = callback => {
   };
 
   useEffect(() => {
-    // Add event listeners for 'paste' and 'copy' events
-    document.addEventListener('paste', handlePaste);
-    document.addEventListener('copy', handleCopy);
+    const element = ref.current;
+
+    if (element) {
+      // Add event listeners for 'paste' and 'copy' events
+      element.addEventListener('paste', handlePaste);
+      element.addEventListener('copy', handleCopy);
+    }
 
     // Clean up by removing event listeners when the component unmounts
     return () => {
-      document.removeEventListener('paste', handlePaste);
-      document.removeEventListener('copy', handleCopy);
+      const element = ref.current;
+
+      if (element) {
+        element.removeEventListener('paste', handlePaste);
+        element.removeEventListener('copy', handleCopy);
+      }
     };
-  }, [callback]);
+  }, [callback, ref]);
 };
 
 export default usePaste;
