@@ -1,10 +1,20 @@
-import { ChangeEvent, FunctionComponent, useCallback, useEffect, useRef, useState } from 'react';
+import cls from 'classnames';
+import {
+  ChangeEvent,
+  FunctionComponent,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import { useKeyboard } from '../../effects/useKeyboard';
 import { PopupProps } from './popup.model';
 import styles from './popup.module.scss';
 
 const Popup: FunctionComponent<PopupProps> = ({ title, onClose, onSaved, data }) => {
   const popupRef = useRef<HTMLDivElement | null>(null);
+  const [textAreaValue, setTextAreaValue] = useState(data || '');
 
   const { activated: escActivated } = useKeyboard({
     ref: popupRef,
@@ -18,21 +28,24 @@ const Popup: FunctionComponent<PopupProps> = ({ title, onClose, onSaved, data })
     }
   }, [escActivated]);
 
-  const handleSave = useCallback(() => onSaved?.(), []);
+  const handleSave = useCallback(() => onSaved?.(textAreaValue), [textAreaValue]);
 
   const handleClose = useCallback(() => onClose?.(), []);
 
-  const [textAreaValue, setTextAreaValue] = useState(data);
+  const onChange = useCallback(
+    (event: ChangeEvent<HTMLTextAreaElement>) => setTextAreaValue(event.target.value),
+    [],
+  );
 
-  const onChange = useCallback((event: ChangeEvent<HTMLTextAreaElement>) => {
-    setTextAreaValue(event.target.value);
+  const closeBtnClass = useMemo(() => {
+    return cls(styles.button, styles.close_btn);
   }, []);
 
   return (
     <div className={styles.container} ref={popupRef}>
       <header className={styles.header}>
         <span>{title}</span>
-        <button className={styles.close_btn} onClick={handleClose}>
+        <button className={closeBtnClass} onClick={handleClose}>
           close
         </button>
       </header>

@@ -1,6 +1,7 @@
 import { ReactNode, RefObject, useCallback, useEffect, useRef, useState } from 'react';
 import { createPortal } from 'react-dom';
 import { Popup } from '../components/popup/popup';
+import styles from '../components/popup/popup.module.scss';
 import { useKeyboard } from './useKeyboard';
 import usePaste from './usePaste';
 
@@ -11,39 +12,53 @@ type usePopupProps = {
   title?: string;
 };
 
-let usePopup: (props: usePopupProps) => ReactNode | null;
-
-usePopup = ({ ref, width = 400, height = 400, title }) => {
+const usePopup: (props: usePopupProps) => ReactNode | null = ({
+  ref,
+  width = 400,
+  height = 400,
+  title,
+}) => {
   const [popupOpen, setPopupOpen] = useState(false);
-
   const [popupData, setPopupData] = useState('');
+
+  const bodyRef = useRef(document.body);
+  const popupPlaceholder = useRef(document.createElement('div'));
+  const popupBackdrop = useRef(document.createElement('div'));
 
   const { activated, reset } = useKeyboard({ ref, ctrlKeyUsed: true, keyCode: 'v' });
 
-  const bodyRef = useRef(document.body);
-
-  const popupPlaceholder = useRef(document.createElement('div'));
-
   usePaste(ref, data => setPopupData(data));
-
-  useEffect(() => {
-    console.log(popupData, activated);
-  }, [popupData, activated]);
 
   const handleClose = useCallback(() => {
     setPopupOpen(false);
     reset?.();
+  }, []);
 
-    // if (ref.current) {
-    //   ref.current.focus();
-    // }
+  const handleSave = useCallback((data: string) => {
+    const target = ref.current as HTMLInputElement;
+
+    if (target) {
+      target.value = data;
+    }
+
+    handleClose();
   }, []);
 
   useEffect(() => {
-    if (activated) {
+    const targetElement = ref.current;
+    if (activated && targetElement) {
       setPopupOpen(true);
-    } else {
+
+      targetElement.style.cssText += `
+        pointer-events: none;
+        opacity: 0.5;
+      `;
+    } else if (targetElement) {
       setPopupOpen(false);
+      targetElement.style.cssText += `
+        pointer-events: auto;
+        opacity: 1;
+      `;
     }
   }, [activated]);
 
@@ -51,22 +66,25 @@ usePopup = ({ ref, width = 400, height = 400, title }) => {
     if (bodyRef && popupPlaceholder) {
       const body = bodyRef.current;
       const placeholder = popupPlaceholder.current;
+      const backdrop = popupBackdrop.current;
+      backdrop.classList.add(styles.popup_container);
 
       placeholder.style.cssText += `
-        position: fixed;
         width: ${width}px;
         height: ${height}px;
         top: 10px;
         left: 10px;
-        display: none;
+        display: flex;
         align-items: center;
         justify-content: center;
         padding: 10px;
         background: #fff;
         border-radius: 4px;
+        border: 12px solid blue;
       `;
 
-      body.appendChild(placeholder);
+      backdrop.appendChild(placeholder);
+      body.appendChild(backdrop);
     }
   }, [bodyRef, popupPlaceholder]);
 
@@ -77,9 +95,11 @@ usePopup = ({ ref, width = 400, height = 400, title }) => {
   }, [activated]);
 
   useEffect(() => {
+    const backdrop = popupBackdrop.current;
     if (ref.current && popupOpen) {
-      const placeholder = popupPlaceholder.current;
-      placeholder.style.display = 'flex';
+      backdrop.style.display = 'flex';
+    } else {
+      backdrop.style.display = 'none';
     }
   }, [ref, popupOpen]);
 
@@ -92,8 +112,8 @@ usePopup = ({ ref, width = 400, height = 400, title }) => {
 
   return popupOpen
     ? createPortal(
-        <Popup title={title} onClose={handleClose} data={popupData} />,
-        popupPlaceholder.current,
+        <Popup title={title} onClose={handleClose} data={popupData} onSaved={handleSave} />,
+        popupBackdrop.current,
       )
     : null;
 };

@@ -3,5 +3,5 @@ export interface PopupProps {
   data?: string;
   onClose?: () => void;
   onOpen?: () => void;
-  onSaved?: () => void;
+  onSaved?: (data: string) => void;
 }

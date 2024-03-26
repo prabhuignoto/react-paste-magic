@@ -27,6 +27,7 @@ $popup-transition-duration: 0.3s;
   justify-content: center;
   align-items: center;
   z-index: 100;
+  border: 1px solid red;
   @include fade-animation(in);
 
   &.closing {
@@ -72,6 +73,7 @@ $popup-transition-duration: 0.3s;
   display: flex;
   justify-content: space-between;
   align-items: center;
+  width: 100%;
 }
 
 .footer {
@@ -89,6 +91,11 @@ $popup-transition-duration: 0.3s;
   cursor: pointer;
   text-transform: capitalize;
   transition: 0.3s;
+}
+
+.close_btn {
+  margin-left: auto;
+  border: 1px solid red;
 }
 
 /* Keyframes */
@@ -112,4 +119,17 @@ $popup-transition-duration: 0.3s;
     opacity: 0;
     transform: scale(0.8);
   }
+}
+
+.popup_container {
+  width: 100%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  height: 100%;
+  background: rgba(255, 255, 255, 0.1);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  display: none;
 }
